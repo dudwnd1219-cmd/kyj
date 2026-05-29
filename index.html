@@ -1007,84 +1007,31 @@ function renderAll() {
 }
 
 // =====================================================
-// YOUTUBE IFRAME PLAYER API
-// =====================================================
-(function () {
-    var s = document.createElement('script');
-    s.src = 'https://www.youtube.com/iframe_api';
-    document.head.appendChild(s);
-})();
-
-var _ytReady  = false;
-var _ytPlayer = null;
-
-window.onYouTubeIframeAPIReady = function () {
-    _ytReady = true;
-};
-
-// =====================================================
-// MODAL
+// MODAL PLAYER
 // =====================================================
 let _currentYtId = '';
 
+// Called synchronously inside click handler → preserves user gesture → autoplay works
 function loadVideo() {
+    var container = document.getElementById('yt-api-container');
+
+    // Inject iframe SYNCHRONOUSLY so the browser treats it as a direct user gesture
+    var iframe = document.createElement('iframe');
+    iframe.setAttribute('allow',
+        'autoplay; encrypted-media; picture-in-picture; fullscreen');
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute('frameborder', '0');
+    iframe.style.cssText =
+        'position:absolute;inset:0;width:100%;height:100%;border:none;';
+    iframe.src = 'https://www.youtube.com/embed/' + _currentYtId
+               + '?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3';
+
+    container.innerHTML = '';
+    container.appendChild(iframe);
+
     document.getElementById('player-thumb').style.display   = 'none';
+    document.getElementById('player-loading').style.display = 'none';
     document.getElementById('player-error').style.display   = 'none';
-    document.getElementById('player-loading').style.display = 'flex';
-
-    function createPlayer() {
-        document.getElementById('player-loading').style.display = 'none';
-
-        // Destroy previous player if any
-        if (_ytPlayer) {
-            try { _ytPlayer.destroy(); } catch(e) {}
-            _ytPlayer = null;
-        }
-
-        // Fresh div for the API to target
-        var container = document.getElementById('yt-api-container');
-        container.innerHTML = '<div id="yt-player-div"></div>';
-
-        _ytPlayer = new YT.Player('yt-player-div', {
-            videoId: _currentYtId,
-            width: '100%',
-            height: '100%',
-            playerVars: {
-                autoplay: 1,
-                rel: 0,
-                modestbranding: 1,
-                iv_load_policy: 3,
-                color: 'white',
-            },
-            events: {
-                onReady: function (e) { e.target.playVideo(); },
-                onError: function (e) { showPlayerError(); }
-            }
-        });
-    }
-
-    if (_ytReady) {
-        createPlayer();
-    } else {
-        var tries = 0;
-        var poll = setInterval(function () {
-            tries++;
-            if (_ytReady) {
-                clearInterval(poll);
-                createPlayer();
-            } else if (tries > 40) {   // 4 s timeout
-                clearInterval(poll);
-                document.getElementById('player-loading').style.display = 'none';
-                showPlayerError();
-            }
-        }, 100);
-    }
-}
-
-function showPlayerError() {
-    document.getElementById('player-error').style.display = 'flex';
-    document.getElementById('yt-error-link').href =
-        'https://www.youtube.com/watch?v=' + _currentYtId;
 }
 
 function openModal(ytId) {
@@ -1092,12 +1039,11 @@ function openModal(ytId) {
     const v = DB[ytId];
     if (!v) return;
 
-    // Reset player to thumbnail state
-    const iframe = document.getElementById('modal-iframe');
-    const thumb  = document.getElementById('player-thumb');
-    iframe.src = '';
-    iframe.style.display = 'none';
-    thumb.style.display  = 'flex';
+    // Reset player area
+    document.getElementById('yt-api-container').innerHTML = '';
+    document.getElementById('player-thumb').style.display   = 'flex';
+    document.getElementById('player-loading').style.display = 'none';
+    document.getElementById('player-error').style.display   = 'none';
     document.getElementById('player-thumb-img').src =
         `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
 
@@ -1145,11 +1091,7 @@ function openModal(ytId) {
 }
 
 function closeModal() {
-    // Stop and destroy YT player
-    if (_ytPlayer) {
-        try { _ytPlayer.stopVideo(); _ytPlayer.destroy(); } catch(e) {}
-        _ytPlayer = null;
-    }
+    // Remove iframe entirely — stops video/audio immediately
     document.getElementById('yt-api-container').innerHTML = '';
 
     // Reset player area
