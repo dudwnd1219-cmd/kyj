@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRDFlix - 인적자원개발 학습 플랫폼</title>
+    <style>
+    /* ==================== RESET & BASE ==================== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+        --accent:       #0062FF;
+        --accent-light: #4d94ff;
+        --bg:           #141414;
+        --surface:      #1c1c1c;
+        --surface2:     #242424;
+        --surface3:     #2e2e2e;
+        --text:         #e5e5e5;
+        --text-dim:     #aaa;
+        --text-muted:   #666;
+        --gold:         #ffd700;
+        --green:        #46d369;
+        --border:       rgba(255,255,255,0.08);
+        --radius:       6px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
+        overflow-x: hidden;
+        min-height: 100vh;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3a3a3a; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    /* ==================== NAVBAR ==================== */
+    .navbar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 200;
+        height: 68px;
+        padding: 0 4%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background 0.4s, box-shadow 0.4s;
+    }
+    .navbar.scrolled {
+        background: rgba(14,14,14,0.97);
+        box-shadow: 0 1px 0 rgba(255,255,255,0.07);
+        backdrop-filter: blur(12px);
+    }
+    .navbar:not(.scrolled) {
+        background: linear-gradient(180deg, rgba(0,0,0,0.75) 0%, transparent 100%);
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 36px; }
+
+    .logo {
+        font-size: 26px;
+        font-weight: 900;
+        letter-spacing: -1.5px;
+        text-decoration: none;
+        color: var(--accent);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .logo em { color: #fff; font-style: normal; }
+
+    .nav-links {
+        display: flex;
+        list-style: none;
+        gap: 6px;
+    }
+    .nav-links a {
+        color: #bbb;
+        text-decoration: none;
+        font-size: 13.5px;
+        padding: 6px 10px;
+        border-radius: var(--radius);
+        transition: color 0.2s, background 0.2s;
+    }
+    .nav-links a:hover { color: #fff; background: rgba(255,255,255,0.07); }
+    .nav-links a.active { color: #fff; font-weight: 600; }
+
+    .nav-right { display: flex; align-items: center; gap: 14px; }
+
+    .search-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0,0,0,0.6);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: var(--radius);
+        padding: 7px 12px;
+        transition: border-color 0.25s, background 0.25s;
+    }
+    .search-wrap:focus-within {
+        border-color: rgba(255,255,255,0.5);
+        background: rgba(0,0,0,0.85);
+    }
+    .search-wrap svg { width: 15px; height: 15px; color: #777; flex-shrink: 0; }
+    .search-wrap input {
+        background: none; border: none; outline: none;
+        color: #fff; font-size: 13px; width: 170px;
+        font-family: inherit;
+    }
+    .search-wrap input::placeholder { color: #666; }
+
+    .icon-btn {
+        background: none; border: none; cursor: pointer;
+        color: #aaa; padding: 4px; position: relative;
+        transition: color 0.2s;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .icon-btn:hover { color: #fff; }
+    .notif-badge {
+        position: absolute; top: 0; right: 0;
+        width: 16px; height: 16px; background: var(--accent);
+        border-radius: 50%; font-size: 10px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff;
+    }
+
+    .avatar-btn {
+        width: 36px; height: 36px; border-radius: 8px;
+        background: linear-gradient(135deg, var(--accent), #7c3aed);
+        color: #fff; font-size: 13px; font-weight: 700;
+        cursor: pointer; border: none;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        transition: transform 0.2s;
+    }
+    .avatar-btn:hover { transform: scale(1.08); }
+
+    /* ==================== HERO ==================== */
+    .hero {
+        position: relative;
+        height: 82vh;
+        min-height: 520px;
+        display: flex;
+        align-items: flex-end;
+        padding: 0 4% 100px;
+    }
+
+    .hero-bg {
+        position: absolute; inset: 0;
+        background-image: url('https://img.youtube.com/vi/0amivOEUGtw/maxresdefault.jpg');
+        background-size: cover;
+        background-position: center 25%;
+        filter: brightness(0.45) saturate(1.1);
+        transform: scale(1.04);
+    }
+
+    .hero-vignette {
+        position: absolute; inset: 0;
+        background:
+            linear-gradient(to top,    rgba(20,20,20,1) 0%, rgba(20,20,20,0.6) 25%, transparent 60%),
+            linear-gradient(to right,  rgba(20,20,20,0.85) 0%, rgba(20,20,20,0.4) 35%, transparent 65%);
+    }
+
+    .hero-content {
+        position: relative; z-index: 1;
+        max-width: 580px;
+    }
+
+    .hero-eyebrow {
+        display: inline-flex; align-items: center; gap: 7px;
+        background: rgba(0,98,255,0.85);
+        color: #fff; font-size: 11px; font-weight: 700;
+        padding: 5px 14px; border-radius: 20px;
+        margin-bottom: 18px;
+        letter-spacing: 0.8px; text-transform: uppercase;
+        backdrop-filter: blur(4px);
+    }
+
+    .hero-title {
+        font-size: clamp(30px, 4.5vw, 54px);
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -1px;
+        margin-bottom: 16px;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    }
+
+    .hero-meta {
+        display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+        margin-bottom: 14px; font-size: 13px; color: #ccc;
+    }
+    .hero-meta .stars { color: var(--gold); letter-spacing: -1px; }
+    .hero-meta .score { color: var(--green); font-weight: 700; }
+    .hero-meta .pill {
+        border: 1px solid rgba(255,255,255,0.3);
+        padding: 2px 10px; border-radius: 20px; font-size: 11px;
+    }
+
+    .hero-desc {
+        font-size: 14.5px; line-height: 1.7; color: #bbb;
+        margin-bottom: 28px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 12px 28px; border-radius: var(--radius);
+        font-size: 15px; font-weight: 700; cursor: pointer;
+        border: none; text-decoration: none;
+        transition: all 0.2s; font-family: inherit;
+        white-space: nowrap;
+    }
+    .btn-play {
+        background: #fff; color: #000;
+    }
+    .btn-play:hover { background: rgba(255,255,255,0.85); }
+
+    .btn-info {
+        background: rgba(109,109,110,0.7); color: #fff;
+        backdrop-filter: blur(4px);
+    }
+    .btn-info:hover { background: rgba(109,109,110,0.9); }
+
+    /* ==================== CONTENT ROWS ==================== */
+    .rows-wrapper { padding-top: 0; position: relative; z-index: 1; }
+
+    .content-row { margin-bottom: 8px; }
+
+    .row-header {
+        padding: 0 4%; margin-bottom: 8px;
+        display: flex; align-items: baseline; gap: 10px;
+    }
+    .row-title {
+        font-size: 18px; font-weight: 700; color: #e5e5e5;
+    }
+    .row-see-all {
+        font-size: 12px; color: var(--accent-light);
+        text-decoration: none; opacity: 0;
+        transition: opacity 0.2s;
+        display: flex; align-items: center; gap: 3px;
+    }
+    .row-header:hover .row-see-all { opacity: 1; }
+
+    .row-outer {
+        position: relative;
+        padding: 0 4%;
+    }
+
+    .scroll-arrow {
+        position: absolute; top: 50%; transform: translateY(-50%);
+        width: 44px; height: 100px;
+        background: rgba(20,20,20,0.9);
+        border: none; color: #fff; font-size: 22px;
+        cursor: pointer; z-index: 20;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s, opacity 0.2s;
+        border-radius: 4px;
+        opacity: 0;
+    }
+    .row-outer:hover .scroll-arrow { opacity: 1; }
+    .scroll-arrow:hover { background: rgba(40,40,40,0.98); }
+    .scroll-arrow.arr-left  { left: 0; border-radius: 0 4px 4px 0; }
+    .scroll-arrow.arr-right { right: 0; border-radius: 4px 0 0 4px; }
+
+    .row-track {
+        display: flex; gap: 6px;
+        overflow-x: auto;
+        overflow-y: clip;
+        padding: 16px 0 40px;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+    }
+    .row-track::-webkit-scrollbar { display: none; }
+
+    /* ==================== CARD ==================== */
+    .card {
+        flex: 0 0 200px;
+        position: relative;
+        cursor: pointer;
+        transition: z-index 0s 0.3s;
+    }
+    .card:hover { z-index: 80; transition: z-index 0s; }
+
+    .card-inner {
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--surface);
+        transition: transform 0.3s cubic-bezier(.25,.46,.45,.94),
+                    box-shadow 0.3s ease;
+        transform-origin: center top;
+    }
+    .card:hover .card-inner {
+        transform: scale(1.22) translateY(-6px);
+        box-shadow: 0 18px 48px rgba(0,0,0,0.85);
+    }
+    .card:first-child:hover .card-inner { transform-origin: left top; }
+
+    .card-thumb {
+        position: relative; padding-top: 56.25%; background: #0a0a0a;
+    }
+    .card-thumb img {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%; object-fit: cover;
+    }
+    .card-thumb img.error-thumb {
+        object-fit: contain; padding: 20%; opacity: 0.3;
+    }
+
+    .card-play-overlay {
+        position: absolute; inset: 0;
+        background: rgba(0,0,0,0.35);
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; transition: opacity 0.25s;
+    }
+    .card:hover .card-play-overlay { opacity: 1; }
+    .play-circle {
+        width: 44px; height: 44px; border-radius: 50%;
+        background: rgba(255,255,255,0.93);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 16px; color: #000;
+    }
+
+    .card-prog-bar {
+        height: 3px; background: rgba(255,255,255,0.15);
+    }
+    .card-prog-fill {
+        height: 100%; background: var(--accent);
+    }
+
+    /* Hover details panel */
+    .card-details {
+        background: var(--surface2);
+        max-height: 0; overflow: hidden;
+        transition: max-height 0.25s ease, padding 0.25s ease;
+        padding: 0 12px;
+    }
+    .card:hover .card-details {
+        max-height: 160px;
+        padding: 10px 12px 12px;
+    }
+
+    .card-action-row {
+        display: flex; gap: 6px; margin-bottom: 8px;
+    }
+    .c-btn {
+        width: 30px; height: 30px; border-radius: 50%;
+        border: 1.5px solid rgba(255,255,255,0.4);
+        background: rgba(0,0,0,0.4); color: #fff;
+        cursor: pointer; font-size: 12px;
+        display: flex; align-items: center; justify-content: center;
+        transition: all 0.15s;
+    }
+    .c-btn:hover { border-color: #fff; background: rgba(255,255,255,0.12); }
+    .c-btn.c-play {
+        background: #fff; color: #000; border-color: #fff;
+    }
+    .c-btn.c-play:hover { background: #ddd; }
+
+    .card-name {
+        font-size: 12.5px; font-weight: 700;
+        line-height: 1.3; margin-bottom: 5px;
+        overflow: hidden; display: -webkit-box;
+        -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    }
+    .card-sub {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 11px; color: var(--text-muted);
+    }
+    .lvl-dot {
+        width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+    }
+    .lvl-dot.bg { background: #46d369; }
+    .lvl-dot.im { background: #ff9800; }
+    .lvl-dot.ad { background: #f44336; }
+
+    .card-tag-row {
+        display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap;
+    }
+    .ctag {
+        font-size: 10px; padding: 2px 7px; border-radius: 20px;
+        background: rgba(0,98,255,0.15); color: #7aadff;
+        border: 1px solid rgba(0,98,255,0.25);
+    }
+
+    /* ==================== MODAL ==================== */
+    .modal-backdrop {
+        position: fixed; inset: 0; z-index: 500;
+        background: rgba(0,0,0,0.82);
+        backdrop-filter: blur(6px);
+        display: none; align-items: center; justify-content: center;
+        padding: 20px;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal-box {
+        background: #1a1a1a;
+        border-radius: 12px;
+        width: 100%; max-width: 860px;
+        max-height: 90vh; overflow-y: auto;
+        animation: popIn 0.28s cubic-bezier(.25,.46,.45,.94);
+        scrollbar-width: thin;
+    }
+    @keyframes popIn {
+        from { transform: scale(0.88); opacity: 0; }
+        to   { transform: scale(1);    opacity: 1; }
+    }
+
+    .modal-player {
+        position: relative; padding-top: 56.25%;
+        background: #000;
+        border-radius: 12px 12px 0 0; overflow: hidden;
+    }
+    .modal-player iframe {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%; border: none;
+        display: none;
+    }
+
+    /* Thumbnail overlay shown before play */
+    .player-thumb-wrap {
+        position: absolute; inset: 0; z-index: 3;
+        cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        background: #000;
+    }
+    .player-thumb-wrap img {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        object-fit: cover; opacity: 0.7;
+        transition: opacity 0.3s;
+    }
+    .player-thumb-wrap:hover img { opacity: 0.55; }
+    .player-big-play {
+        position: relative; z-index: 1;
+        width: 72px; height: 72px; border-radius: 50%;
+        background: rgba(200,0,0,0.92);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 28px; color: #fff;
+        transition: transform 0.2s, background 0.2s;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.6);
+    }
+    .player-thumb-wrap:hover .player-big-play { transform: scale(1.12); background: rgb(210,0,0); }
+
+    .yt-open-btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 9px 18px; border-radius: var(--radius);
+        background: #ff0000; color: #fff;
+        font-size: 13px; font-weight: 700; cursor: pointer;
+        border: none; text-decoration: none; font-family: inherit;
+        transition: background 0.2s;
+        flex-shrink: 0;
+    }
+    .yt-open-btn:hover { background: #cc0000; }
+
+    /* YT API player container */
+    #yt-api-container {
+        position: absolute; inset: 0; z-index: 1;
+    }
+    #yt-api-container iframe {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%; border: none;
+    }
+
+    /* Loading spinner */
+    .player-loading {
+        position: absolute; inset: 0; z-index: 6;
+        background: #000;
+        display: none; align-items: center; justify-content: center;
+    }
+    .spinner {
+        width: 44px; height: 44px;
+        border: 4px solid rgba(255,255,255,0.15);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error / embed-blocked state */
+    .player-error {
+        position: absolute; inset: 0; z-index: 6;
+        background: #0d0d0d;
+        display: none; flex-direction: column;
+        align-items: center; justify-content: center;
+        gap: 14px; text-align: center; padding: 24px;
+    }
+    .player-error p { color: #aaa; font-size: 14px; line-height: 1.6; }
+    .player-error .err-icon { font-size: 40px; opacity: 0.5; }
+    .modal-player-gradient {
+        position: absolute; bottom: 0; left: 0; right: 0; height: 80px;
+        background: linear-gradient(to top, #1a1a1a, transparent);
+        pointer-events: none;
+    }
+
+    .modal-close-btn {
+        position: absolute; top: 14px; right: 14px;
+        width: 34px; height: 34px; border-radius: 50%;
+        background: rgba(20,20,20,0.85);
+        border: 1.5px solid rgba(255,255,255,0.2);
+        color: #fff; font-size: 16px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 10; transition: background 0.2s;
+    }
+    .modal-close-btn:hover { background: rgba(50,50,50,0.95); }
+
+    .modal-body { padding: 24px 28px 28px; }
+
+    .modal-title-row {
+        display: flex; align-items: flex-start;
+        justify-content: space-between; gap: 16px; margin-bottom: 12px;
+    }
+    .modal-title { font-size: 22px; font-weight: 800; line-height: 1.2; }
+
+    .modal-meta {
+        display: flex; flex-wrap: wrap; gap: 10px;
+        font-size: 13px; color: var(--text-dim); margin-bottom: 14px;
+    }
+    .modal-meta .green { color: var(--green); font-weight: 700; }
+    .modal-meta .gold  { color: var(--gold); }
+
+    .modal-desc {
+        font-size: 14px; line-height: 1.75; color: #aaa; margin-bottom: 22px;
+    }
+
+    .prog-block {
+        background: var(--surface2);
+        border-radius: 10px; padding: 16px 18px; margin-bottom: 22px;
+    }
+    .prog-label-row {
+        display: flex; justify-content: space-between;
+        font-size: 13px; margin-bottom: 9px;
+    }
+    .prog-label-row span:last-child { color: var(--accent-light); font-weight: 700; }
+    .prog-track {
+        height: 6px; background: rgba(255,255,255,0.1);
+        border-radius: 3px; overflow: hidden;
+    }
+    .prog-fill {
+        height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-light));
+        border-radius: 3px; transition: width 0.6s cubic-bezier(.25,.46,.45,.94);
+    }
+
+    .curriculum-block { border-top: 1px solid var(--border); padding-top: 20px; }
+    .curriculum-block h3 { font-size: 15px; font-weight: 700; margin-bottom: 10px; }
+
+    .curr-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 9px 10px; border-radius: var(--radius);
+        cursor: pointer; transition: background 0.15s;
+    }
+    .curr-item:hover { background: var(--surface3); }
+
+    .curr-num {
+        width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+        border: 1.5px solid #444; color: #666; font-size: 11px;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .curr-item.done .curr-num {
+        background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    .curr-title { flex: 1; font-size: 13px; }
+    .curr-dur { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+
+    /* ==================== TOAST ==================== */
+    .toast {
+        position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+        background: rgba(30,30,30,0.96); border: 1px solid var(--border);
+        color: #fff; font-size: 13px; padding: 10px 20px;
+        border-radius: 20px; z-index: 9999;
+        opacity: 0; transition: all 0.3s; pointer-events: none;
+        backdrop-filter: blur(8px);
+        white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ==================== FOOTER ==================== */
+    .footer {
+        margin-top: 60px; padding: 40px 4%;
+        border-top: 1px solid var(--border);
+        color: var(--text-muted); font-size: 12px;
+    }
+    .footer-inner {
+        max-width: 900px;
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 20px; margin-bottom: 24px;
+    }
+    .footer-col h4 { font-size: 13px; color: #777; margin-bottom: 10px; }
+    .footer-col a {
+        display: block; color: var(--text-muted); text-decoration: none;
+        font-size: 12px; margin-bottom: 6px; transition: color 0.15s;
+    }
+    .footer-col a:hover { color: #aaa; }
+    .footer-copy { font-size: 11px; color: #444; }
+
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 768px) {
+        .nav-links { display: none; }
+        .search-wrap input { width: 120px; }
+        .hero { height: 65vh; padding-bottom: 60px; }
+        .card { flex: 0 0 150px; }
+        .modal-body { padding: 16px; }
+        .modal-title { font-size: 18px; }
+    }
+    </style>
+</head>
+<body>
+
+<!-- ======================== NAVBAR ======================== -->
+<nav class="navbar" id="navbar">
+    <div class="nav-left">
+        <a href="#" class="logo">HRD<em>Flix</em></a>
+        <ul class="nav-links">
+            <li><a href="#" class="active">홈</a></li>
+            <li><a href="#">내 강좌</a></li>
+            <li><a href="#">카테고리</a></li>
+            <li><a href="#">라이브 강의</a></li>
+            <li><a href="#">커뮤니티</a></li>
+        </ul>
+    </div>
+    <div class="nav-right">
+        <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="강좌, 강사, 키워드 검색…" id="search-input">
+        </div>
+        <button class="icon-btn" title="알림" onclick="showToast('새 알림이 3건 있습니다')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span class="notif-badge">3</span>
+        </button>
+        <button class="avatar-btn" title="마이페이지" onclick="showToast('마이페이지 준비 중입니다')">김</button>
+    </div>
+</nav>
+
+<!-- ======================== HERO ======================== -->
+<section class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-vignette"></div>
+    <div class="hero-content">
+        <div class="hero-eyebrow">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            이달의 추천 강좌
+        </div>
+        <h1 class="hero-title">HRD 전략 수립<br>실무 완성 과정</h1>
+        <div class="hero-meta">
+            <span class="stars">★★★★★</span>
+            <span class="score">4.9</span>
+            <span>·</span>
+            <span class="pill">중급</span>
+            <span>·</span>
+            <span>2시간 30분</span>
+            <span>·</span>
+            <span>김민준 강사</span>
+        </div>
+        <p class="hero-desc">
+            인적자원개발(HRD)의 전략적 접근 방법을 학습합니다. 조직의 비전과 연계된 HRD 전략 수립,
+            교육체계 설계, 성과 측정까지 실무 중심으로 배우는 최고 인기 과정입니다.
+        </p>
+        <div class="hero-actions">
+            <button class="btn btn-play" onclick="openModal('0amivOEUGtw')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                재생
+            </button>
+            <button class="btn btn-info" onclick="openModal('0amivOEUGtw')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                상세 정보
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ======================== ROWS ======================== -->
+<div class="rows-wrapper" id="rows-wrapper">
+
+    <div class="content-row" id="section-continue">
+        <div class="row-header">
+            <h2 class="row-title">⏱ 계속 시청하기</h2>
+            <a href="#" class="row-see-all">모두 보기 ›</a>
+        </div>
+        <div class="row-outer">
+            <button class="scroll-arrow arr-left"  onclick="scrollTrack(this,-1)">‹</button>
+            <div class="row-track" id="track-continue"></div>
+            <button class="scroll-arrow arr-right" onclick="scrollTrack(this,1)">›</button>
+        </div>
+    </div>
+
+    <div class="content-row">
+        <div class="row-header">
+            <h2 class="row-title">🔥 인기 HRD 강좌</h2>
+            <a href="#" class="row-see-all">모두 보기 ›</a>
+        </div>
+        <div class="row-outer">
+            <button class="scroll-arrow arr-left"  onclick="scrollTrack(this,-1)">‹</button>
+            <div class="row-track" id="track-popular"></div>
+            <button class="scroll-arrow arr-right" onclick="scrollTrack(this,1)">›</button>
+        </div>
+    </div>
+
+    <div class="content-row">
+        <div class="row-header">
+            <h2 class="row-title">💼 직무역량 강화</h2>
+            <a href="#" class="row-see-all">모두 보기 ›</a>
+        </div>
+        <div class="row-outer">
+            <button class="scroll-arrow arr-left"  onclick="scrollTrack(this,-1)">‹</button>
+            <div class="row-track" id="track-job"></div>
+            <button class="scroll-arrow arr-right" onclick="scrollTrack(this,1)">›</button>
+        </div>
+    </div>
+
+    <div class="content-row">
+        <div class="row-header">
+            <h2 class="row-title">👑 리더십 &amp; 매니지먼트</h2>
+            <a href="#" class="row-see-all">모두 보기 ›</a>
+        </div>
+        <div class="row-outer">
+            <button class="scroll-arrow arr-left"  onclick="scrollTrack(this,-1)">‹</button>
+            <div class="row-track" id="track-leader"></div>
+            <button class="scroll-arrow arr-right" onclick="scrollTrack(this,1)">›</button>
+        </div>
+    </div>
+
+    <div class="content-row">
+        <div class="row-header">
+            <h2 class="row-title">✨ 신규 추가</h2>
+            <a href="#" class="row-see-all">모두 보기 ›</a>
+        </div>
+        <div class="row-outer">
+            <button class="scroll-arrow arr-left"  onclick="scrollTrack(this,-1)">‹</button>
+            <div class="row-track" id="track-new"></div>
+            <button class="scroll-arrow arr-right" onclick="scrollTrack(this,1)">›</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- ======================== FOOTER ======================== -->
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-col">
+            <h4>서비스</h4>
+            <a href="#">이용약관</a>
+            <a href="#">개인정보처리방침</a>
+            <a href="#">고객센터</a>
+            <a href="#">공지사항</a>
+        </div>
+        <div class="footer-col">
+            <h4>학습</h4>
+            <a href="#">전체 강좌</a>
+            <a href="#">라이브 강의</a>
+            <a href="#">자격증 과정</a>
+            <a href="#">기업 맞춤형</a>
+        </div>
+        <div class="footer-col">
+            <h4>회사</h4>
+            <a href="#">회사 소개</a>
+            <a href="#">강사 지원</a>
+            <a href="#">파트너십</a>
+            <a href="#">채용 정보</a>
+        </div>
+        <div class="footer-col">
+            <h4>소셜</h4>
+            <a href="#">YouTube</a>
+            <a href="#">Instagram</a>
+            <a href="#">LinkedIn</a>
+            <a href="#">Newsletter</a>
+        </div>
+    </div>
+    <p class="footer-copy">© 2024 HRDFlix. 인적자원개발 전문 학습 플랫폼. All rights reserved.</p>
+</footer>
+
+<!-- ======================== MODAL ======================== -->
+<div class="modal-backdrop" id="modal-backdrop" onclick="onBackdropClick(event)">
+    <div class="modal-box">
+        <div class="modal-player">
+            <!-- 1. YouTube IFrame API will inject player here -->
+            <div id="yt-api-container"></div>
+
+            <!-- 2. Thumbnail shown by default -->
+            <div class="player-thumb-wrap" id="player-thumb" onclick="loadVideo()">
+                <img id="player-thumb-img" src="" alt="강좌 썸네일">
+                <div class="player-big-play">▶</div>
+            </div>
+
+            <!-- 3. Loading spinner -->
+            <div class="player-loading" id="player-loading">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- 4. Error / embed blocked fallback -->
+            <div class="player-error" id="player-error">
+                <div class="err-icon">⚠️</div>
+                <p>이 영상은 외부 사이트 재생이<br>제한되어 있습니다.</p>
+                <a id="yt-error-link" href="#" target="_blank" rel="noopener" class="yt-open-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.52 3.5 12 3.5 12 3.5s-7.52 0-9.38.55A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14C4.48 20.5 12 20.5 12 20.5s7.52 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/>
+                    </svg>
+                    YouTube에서 직접 보기
+                </a>
+            </div>
+
+            <div class="modal-player-gradient"></div>
+            <button class="modal-close-btn" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-title-row">
+                <h2 class="modal-title" id="modal-title"></h2>
+                <a id="yt-open-btn" href="#" target="_blank" rel="noopener" class="yt-open-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.52 3.5 12 3.5 12 3.5s-7.52 0-9.38.55A3.02 3.02 0 0 0 .5 6.19C0 8.07 0 12 0 12s0 3.93.5 5.81a3.02 3.02 0 0 0 2.12 2.14C4.48 20.5 12 20.5 12 20.5s7.52 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14C24 15.93 24 12 24 12s0-3.93-.5-5.81zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/>
+                    </svg>
+                    YouTube에서 보기
+                </a>
+            </div>
+            <div class="modal-meta" id="modal-meta"></div>
+            <p class="modal-desc" id="modal-desc"></p>
+            <div class="prog-block" id="prog-block">
+                <div class="prog-label-row">
+                    <span>학습 진행률</span>
+                    <span id="prog-pct">0%</span>
+                </div>
+                <div class="prog-track">
+                    <div class="prog-fill" id="prog-fill" style="width:0%"></div>
+                </div>
+            </div>
+            <div class="curriculum-block">
+                <h3>커리큘럼</h3>
+                <div id="modal-curriculum"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ======================== TOAST ======================== -->
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================================================
+// DATA
+// =====================================================
+const DB = {
+    '0amivOEUGtw': {
+        title: 'HRD 전략 수립 실무 완성 과정',
+        instructor: '김민준',
+        level: '중급', lvlKey: 'im',
+        duration: '2시간 30분',
+        rating: 4.9, progress: 65,
+        tags: ['HRD전략', '교육체계', '성과관리'],
+        desc: '인적자원개발(HRD)의 전략적 접근 방법을 학습합니다. 조직의 비전과 연계된 HRD 전략 수립, 교육체계 설계, 성과 측정까지 실무 중심으로 배우는 현장 밀착형 과정입니다.',
+        curriculum: [
+            { t: 'HRD의 이해와 패러다임 변화',     d: '25분', done: true },
+            { t: '전략적 HRD 수립 프레임워크',       d: '30분', done: true },
+            { t: '교육체계 설계 방법론',             d: '35분', done: false },
+            { t: '역량모델 기반 교육기획',           d: '30분', done: false },
+            { t: '교육 ROI 측정과 성과 보고',        d: '30분', done: false },
+        ]
+    },
+    'ZT3wAXcwzF8': {
+        title: '조직개발과 변화관리 실전',
+        instructor: '이수진',
+        level: '고급', lvlKey: 'ad',
+        duration: '1시간 45분',
+        rating: 4.8, progress: 30,
+        tags: ['조직개발', '변화관리', 'OD'],
+        desc: '조직의 변화를 성공적으로 이끄는 OD(Organization Development) 전문가 과정입니다. 변화 저항 극복 전략과 조직문화 혁신 방법을 심도 있게 다룹니다.',
+        curriculum: [
+            { t: '조직개발(OD)의 이론적 기반',      d: '20분', done: true },
+            { t: '변화관리 모델과 실무 적용',        d: '25분', done: false },
+            { t: '조직진단 도구와 활용법',           d: '30분', done: false },
+            { t: '변화 저항 극복 전략',              d: '30분', done: false },
+        ]
+    },
+    'KmdW5kNu6Is': {
+        title: '성과관리 시스템 구축 실무',
+        instructor: '박영호',
+        level: '중급', lvlKey: 'im',
+        duration: '3시간',
+        rating: 4.7, progress: 80,
+        tags: ['성과관리', 'OKR', 'KPI'],
+        desc: 'OKR, KPI 등 다양한 성과관리 방법론을 비교·분석하고, 조직 상황에 맞는 최적의 성과관리 시스템을 설계하는 방법을 학습합니다.',
+        curriculum: [
+            { t: '성과관리의 진화와 트렌드',         d: '20분', done: true },
+            { t: 'KPI 설계와 관리 체계',             d: '35분', done: true },
+            { t: 'OKR 도입과 운영 방법',             d: '40분', done: true },
+            { t: '성과 면담과 피드백 스킬',          d: '35분', done: true },
+            { t: '성과관리 시스템 구현 실습',        d: '50분', done: false },
+        ]
+    },
+    'd6wI4gZLlrQ': {
+        title: 'AI 시대의 HRD 혁신 전략',
+        instructor: '최지현',
+        level: '입문', lvlKey: 'bg',
+        duration: '1시간 20분',
+        rating: 4.9, progress: 0,
+        tags: ['AI활용', 'HRD혁신', '디지털전환'],
+        desc: 'ChatGPT·생성형 AI를 활용한 교육혁신 방법을 학습합니다. AI 기반 개인화 학습 설계, HR테크 트렌드, 그리고 데이터 기반 HRD 의사결정까지 다룹니다.',
+        curriculum: [
+            { t: 'AI와 HRD의 만남',                  d: '15분', done: false },
+            { t: '생성형 AI 교육 콘텐츠 활용법',     d: '25분', done: false },
+            { t: 'HR테크 트렌드와 핵심 도구',        d: '20분', done: false },
+            { t: 'AI 기반 개인화 학습 설계',         d: '20분', done: false },
+        ]
+    },
+    'G10SFO4kXGI': {
+        title: '직무분석과 역량모델링 완성',
+        instructor: '정태영',
+        level: '중급', lvlKey: 'im',
+        duration: '2시간 15분',
+        rating: 4.8, progress: 0,
+        tags: ['직무분석', '역량모델', 'NCS'],
+        desc: 'NCS 기반 직무분석부터 역량모델 설계까지 체계적으로 학습합니다. 실제 기업 사례를 통한 역량 Dictionary 구축 방법과 평가 도구 개발 방법을 익힙니다.',
+        curriculum: [
+            { t: '직무분석 방법론 개요',             d: '25분', done: false },
+            { t: 'NCS 기반 직무 설계 실습',          d: '30분', done: false },
+            { t: '역량모델 설계 프로세스',           d: '35분', done: false },
+            { t: '역량 Dictionary 구축',             d: '30분', done: false },
+            { t: '역량평가 도구 개발',               d: '35분', done: false },
+        ]
+    }
+};
+
+const ROWS_DATA = {
+    'continue': ['0amivOEUGtw', 'ZT3wAXcwzF8', 'KmdW5kNu6Is', 'd6wI4gZLlrQ', 'G10SFO4kXGI'],
+    'popular':  ['d6wI4gZLlrQ', 'G10SFO4kXGI', '0amivOEUGtw', 'ZT3wAXcwzF8', 'KmdW5kNu6Is'],
+    'job':      ['KmdW5kNu6Is', 'G10SFO4kXGI', 'd6wI4gZLlrQ', '0amivOEUGtw', 'ZT3wAXcwzF8'],
+    'leader':   ['ZT3wAXcwzF8', '0amivOEUGtw', 'd6wI4gZLlrQ', 'KmdW5kNu6Is', 'G10SFO4kXGI'],
+    'new':      ['G10SFO4kXGI', 'd6wI4gZLlrQ', 'ZT3wAXcwzF8', '0amivOEUGtw', 'KmdW5kNu6Is'],
+};
+
+// =====================================================
+// RENDER
+// =====================================================
+function thumb(id) {
+    return `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+}
+
+function starsHtml(r) {
+    const full = Math.floor(r);
+    const half = r - full >= 0.5 ? 1 : 0;
+    return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - half);
+}
+
+function buildCard(ytId, showProg) {
+    const v = DB[ytId];
+    const progBar = (showProg && v.progress > 0)
+        ? `<div class="card-prog-bar"><div class="card-prog-fill" style="width:${v.progress}%"></div></div>` : '';
+
+    const tags = v.tags.slice(0, 2).map(t => `<span class="ctag">${t}</span>`).join('');
+
+    return `
+    <div class="card" onclick="openModal('${ytId}')">
+        <div class="card-inner">
+            <div class="card-thumb">
+                <img src="${thumb(ytId)}" alt="${v.title}" loading="lazy"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'320\\' height=\\'180\\'><rect width=\\'320\\' height=\\'180\\' fill=\\'%231a1a2e\\'/><text x=\\'50%\\' y=\\'50%\\' fill=\\'%23444\\' font-size=\\'14\\' text-anchor=\\'middle\\' dominant-baseline=\\'middle\\'>HRD Flix</text></svg>'">
+                <div class="card-play-overlay">
+                    <div class="play-circle">▶</div>
+                </div>
+            </div>
+            ${progBar}
+            <div class="card-details">
+                <div class="card-action-row">
+                    <button class="c-btn c-play" onclick="event.stopPropagation();openModal('${ytId}')">▶</button>
+                    <button class="c-btn" onclick="event.stopPropagation();showToast('찜 목록에 추가했습니다')" title="찜하기">＋</button>
+                    <button class="c-btn" onclick="event.stopPropagation();showToast('좋아요를 눌렀습니다')" title="좋아요">👍</button>
+                </div>
+                <div class="card-name">${v.title}</div>
+                <div class="card-sub">
+                    <span class="lvl-dot ${v.lvlKey}"></span>
+                    <span>${v.level}</span>
+                    <span>·</span>
+                    <span>${v.duration}</span>
+                </div>
+                <div class="card-tag-row">${tags}</div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderAll() {
+    const cfg = {
+        'continue': { trackId: 'track-continue', prog: true },
+        'popular':  { trackId: 'track-popular',  prog: false },
+        'job':      { trackId: 'track-job',       prog: false },
+        'leader':   { trackId: 'track-leader',    prog: false },
+        'new':      { trackId: 'track-new',       prog: false },
+    };
+    for (const [key, c] of Object.entries(cfg)) {
+        const el = document.getElementById(c.trackId);
+        if (el) el.innerHTML = ROWS_DATA[key].map(id => buildCard(id, c.prog)).join('');
+    }
+}
+
+// =====================================================
+// YOUTUBE IFRAME PLAYER API
+// =====================================================
+(function () {
+    var s = document.createElement('script');
+    s.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(s);
+})();
+
+var _ytReady  = false;
+var _ytPlayer = null;
+
+window.onYouTubeIframeAPIReady = function () {
+    _ytReady = true;
+};
+
+// =====================================================
+// MODAL
+// =====================================================
+let _currentYtId = '';
+
+function loadVideo() {
+    document.getElementById('player-thumb').style.display   = 'none';
+    document.getElementById('player-error').style.display   = 'none';
+    document.getElementById('player-loading').style.display = 'flex';
+
+    function createPlayer() {
+        document.getElementById('player-loading').style.display = 'none';
+
+        // Destroy previous player if any
+        if (_ytPlayer) {
+            try { _ytPlayer.destroy(); } catch(e) {}
+            _ytPlayer = null;
+        }
+
+        // Fresh div for the API to target
+        var container = document.getElementById('yt-api-container');
+        container.innerHTML = '<div id="yt-player-div"></div>';
+
+        _ytPlayer = new YT.Player('yt-player-div', {
+            videoId: _currentYtId,
+            width: '100%',
+            height: '100%',
+            playerVars: {
+                autoplay: 1,
+                rel: 0,
+                modestbranding: 1,
+                iv_load_policy: 3,
+                color: 'white',
+            },
+            events: {
+                onReady: function (e) { e.target.playVideo(); },
+                onError: function (e) { showPlayerError(); }
+            }
+        });
+    }
+
+    if (_ytReady) {
+        createPlayer();
+    } else {
+        var tries = 0;
+        var poll = setInterval(function () {
+            tries++;
+            if (_ytReady) {
+                clearInterval(poll);
+                createPlayer();
+            } else if (tries > 40) {   // 4 s timeout
+                clearInterval(poll);
+                document.getElementById('player-loading').style.display = 'none';
+                showPlayerError();
+            }
+        }, 100);
+    }
+}
+
+function showPlayerError() {
+    document.getElementById('player-error').style.display = 'flex';
+    document.getElementById('yt-error-link').href =
+        'https://www.youtube.com/watch?v=' + _currentYtId;
+}
+
+function openModal(ytId) {
+    _currentYtId = ytId;
+    const v = DB[ytId];
+    if (!v) return;
+
+    // Reset player to thumbnail state
+    const iframe = document.getElementById('modal-iframe');
+    const thumb  = document.getElementById('player-thumb');
+    iframe.src = '';
+    iframe.style.display = 'none';
+    thumb.style.display  = 'flex';
+    document.getElementById('player-thumb-img').src =
+        `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`;
+
+    // YouTube open link
+    document.getElementById('yt-open-btn').href =
+        `https://www.youtube.com/watch?v=${ytId}`;
+
+    document.getElementById('modal-title').textContent = v.title;
+
+    document.getElementById('modal-meta').innerHTML = `
+        <span class="gold">${starsHtml(v.rating)}</span>
+        <span class="green">${v.rating}</span>
+        <span>·</span>
+        <span>${v.level}</span>
+        <span>·</span>
+        <span>${v.duration}</span>
+        <span>·</span>
+        <span>${v.instructor} 강사</span>
+        ${v.tags.map(t => `<span style="background:rgba(0,98,255,.15);color:#7aadff;padding:2px 8px;border-radius:20px;font-size:11px;">${t}</span>`).join('')}
+    `;
+
+    document.getElementById('modal-desc').textContent = v.desc;
+
+    const pb = document.getElementById('prog-block');
+    if (v.progress > 0) {
+        pb.style.display = 'block';
+        document.getElementById('prog-pct').textContent = v.progress + '%';
+        requestAnimationFrame(() => {
+            document.getElementById('prog-fill').style.width = v.progress + '%';
+        });
+    } else {
+        pb.style.display = 'none';
+    }
+
+    document.getElementById('modal-curriculum').innerHTML =
+        v.curriculum.map((c, i) => `
+        <div class="curr-item ${c.done ? 'done' : ''}">
+            <div class="curr-num">${c.done ? '✓' : i + 1}</div>
+            <div class="curr-title">${c.t}</div>
+            <div class="curr-dur">${c.d}</div>
+        </div>`).join('');
+
+    document.getElementById('modal-backdrop').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+    // Stop and destroy YT player
+    if (_ytPlayer) {
+        try { _ytPlayer.stopVideo(); _ytPlayer.destroy(); } catch(e) {}
+        _ytPlayer = null;
+    }
+    document.getElementById('yt-api-container').innerHTML = '';
+
+    // Reset player area
+    document.getElementById('player-thumb').style.display   = 'flex';
+    document.getElementById('player-loading').style.display = 'none';
+    document.getElementById('player-error').style.display   = 'none';
+    document.getElementById('player-thumb-img').src = '';
+
+    document.getElementById('modal-backdrop').classList.remove('open');
+    document.body.style.overflow = '';
+    document.getElementById('prog-fill').style.width = '0%';
+}
+
+function onBackdropClick(e) {
+    if (e.target === document.getElementById('modal-backdrop')) closeModal();
+}
+
+// =====================================================
+// SCROLL
+// =====================================================
+function scrollTrack(btn, dir) {
+    const track = btn.parentElement.querySelector('.row-track');
+    track.scrollBy({ left: dir * 640, behavior: 'smooth' });
+}
+
+// =====================================================
+// NAVBAR
+// =====================================================
+window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// =====================================================
+// SEARCH
+// =====================================================
+document.getElementById('search-input').addEventListener('input', function () {
+    const q = this.value.trim().toLowerCase();
+    if (!q) { renderAll(); return; }
+
+    const filtered = Object.keys(DB).filter(id => {
+        const v = DB[id];
+        return v.title.toLowerCase().includes(q)
+            || v.instructor.toLowerCase().includes(q)
+            || v.tags.some(t => t.toLowerCase().includes(q))
+            || v.level.toLowerCase().includes(q);
+    });
+
+    const tracks = ['track-continue','track-popular','track-job','track-leader','track-new'];
+    tracks.forEach(tid => {
+        const el = document.getElementById(tid);
+        if (el) {
+            const ids = filtered.length ? filtered : Object.keys(DB);
+            el.innerHTML = ids.map(id => buildCard(id, tid === 'track-continue')).join('');
+        }
+    });
+});
+
+// =====================================================
+// TOAST
+// =====================================================
+let toastTimer;
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+// =====================================================
+// KEYBOARD
+// =====================================================
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+});
+
+// =====================================================
+// INIT
+// =====================================================
+renderAll();
+</script>
+</body>
+</html>
