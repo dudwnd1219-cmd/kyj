@@ -1,0 +1,171 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;700&display=swap');
+
+:root {
+  --primary: #1c69d4;
+  --primary-active: #0653b6;
+  --canvas: #fff;
+  --surface-card: #fafafa;
+  --surface-dark: #1a2129;
+  --surface-soft: #f7f7f7;
+  --surface-strong: #ebebeb;
+  --ink: #262626;
+  --hairline: #e6e6e6;
+  --hairline-strong: #cccccc;
+  --section-spacing: 80px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Apple SD Gothic Neo', Arial, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.navbar {
+  background: var(--canvas);
+  border-bottom: 1px solid var(--hairline);
+  padding: 0 0 0 0;
+}
+.navbar .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+}
+.logo {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--primary);
+}
+nav a {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 700;
+  margin-left: 32px;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+nav a:hover {
+  color: var(--primary);
+}
+
+.hero {
+  background: var(--surface-dark);
+  color: #fff;
+  padding: var(--section-spacing) 0 56px 0;
+  text-align: center;
+}
+.hero h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.hero p {
+  font-size: 1.25rem;
+  font-weight: 300;
+  margin-bottom: 32px;
+}
+.cta {
+  display: inline-block;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  padding: 16px 40px;
+  border: none;
+  border-radius: 0;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.cta:hover {
+  background: var(--primary-active);
+}
+
+section {
+  padding: var(--section-spacing) 0;
+}
+.product .card {
+  background: var(--surface-card);
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(28,105,212,0.04);
+  padding: 32px 24px;
+  margin-top: 24px;
+  text-align: left;
+  border: 1px solid var(--hairline);
+  max-width: 420px;
+}
+.product h2 {
+  font-weight: 700;
+  font-size: 2rem;
+}
+.product h3 {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.org-chart {
+  background: var(--surface-soft);
+  border: 1px solid var(--hairline);
+  padding: 24px;
+  font-family: 'Roboto Mono', 'Consolas', monospace;
+  font-size: 1rem;
+  white-space: pre;
+  border-radius: 0;
+  margin-top: 24px;
+}
+.org h2 {
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 32px;
+  background: var(--surface-card);
+  border: 1px solid var(--hairline);
+  padding: 32px 24px;
+  border-radius: 0;
+}
+.info h4 {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--primary);
+}
+
+.footer {
+  background: var(--surface-soft);
+  color: var(--ink);
+  text-align: center;
+  padding: 32px 0 24px 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 0 8px;
+  }
+  .navbar .container {
+    flex-direction: column;
+    height: auto;
+    padding: 12px 0;
+  }
+  nav a {
+    margin-left: 16px;
+    font-size: 0.95rem;
+  }
+  .hero h1 {
+    font-size: 1.5rem;
+  }
+  .product .card, .info-grid {
+    padding: 16px 8px;
+  }
+}
